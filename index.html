@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultimate Todo List</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="todo-styles.css">
+</head>
+<body>
+    <div class="container">
+        <header class="app-header">
+            <h1><i class="fas fa-tasks"></i> Task Manager</h1>
+            <div class="stats">
+                <span id="totalTasks">0 tasks</span>
+                <span id="completedTasks">0 completed</span>
+            </div>
+        </header>
+
+        <div class="input-section">
+            <div class="input-group">
+                <input type="text" id="taskInput" placeholder="What needs to be done?" 
+                       autocomplete="off" aria-label="Task input">
+                <button class="input-icon" onclick="addTask()">
+                    <i class="fas fa-plus"></i>
+                </button>
+            </div>
+            
+            <div class="input-options">
+                <div class="option-group">
+                    <label><i class="fas fa-exclamation-circle"></i> Priority:</label>
+                    <select id="prioritySelect" class="styled-select">
+                        <option value="low">Low</option>
+                        <option value="medium">Medium</option>
+                        <option value="high">High</option>
+                    </select>
+                </div>
+                
+                <div class="option-group">
+                    <label><i class="fas fa-calendar-alt"></i> Due Date:</label>
+                    <input type="date" id="dueDate" class="styled-date">
+                </div>
+                
+                <div class="option-group">
+                    <label><i class="fas fa-tag"></i> Category:</label>
+                    <select id="categorySelect" class="styled-select">
+                        <option value="personal">Personal</option>
+                        <option value="work">Work</option>
+                        <option value="shopping">Shopping</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls-section">
+            <div class="filter-group">
+                <select id="filterStatus" class="styled-select" onchange="renderTasks()">
+                    <option value="all">All Tasks</option>
+                    <option value="active">Active</option>
+                    <option value="completed">Completed</option>
+                </select>
+                <select id="sortBy" class="styled-select" onchange="renderTasks()">
+                    <option value="dueDate">Sort by Date</option>
+                    <option value="priority">Sort by Priority</option>
+                </select>
+            </div>
+            <button class="action-btn" onclick="clearCompleted()">
+                <i class="fas fa-trash"></i> Clear Completed
+            </button>
+        </div>
+
+        <ul id="taskList" class="task-list"></ul>
+
+        <div id="undoSnackbar" class="snackbar">
+            <span>Task deleted</span>
+            <button class="undo-btn" onclick="undoDelete()">Undo</button>
+        </div>
+    </div>
+
+    <script>
+        // Enhanced JavaScript with additional features
+        let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+        let deletedTask = null;
+        let deleteTimeout = null;
+
+        // Initialize app
+        function init() {
+            renderTasks();
+            updateStats();
+            document.getElementById('taskInput').focus();
+        }
+
+        function saveTasks() {
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+            updateStats();
+        }
+
+        function updateStats() {
+            const total = tasks.length;
+            const completed = tasks.filter(t => t.completed).length;
+            document.getElementById('totalTasks').textContent = `${total} ${total === 1 ? 'task' : 'tasks'}`;
+            document.getElementById('completedTasks').textContent = `${completed} completed`;
+        }
+
+        function renderTasks() {
+            const taskList = document.getElementById('taskList');
+            taskList.innerHTML = '';
+
+            const filterStatus = document.getElementById('filterStatus').value;
+            const sortBy = document.getElementById('sortBy').value;
+
+            let filteredTasks = tasks.filter(task => {
+                if (filterStatus === 'completed') return task.completed;
+                if (filterStatus === 'active') return !task.completed;
+                return true;
+            });
+
+            filteredTasks.sort((a, b) => {
+                if (sortBy === 'dueDate') {
+                    return new Date(a.dueDate) - new Date(b.dueDate);
+                }
+                return priorityValue(b.priority) - priorityValue(a.priority);
+            });
+
+            filteredTasks.forEach(task => {
+                const li = createTaskElement(task);
+                taskList.appendChild(li);
+            });
+        }
+
+        function createTaskElement(task) {
+            const li = document.createElement('li');
+            li.className = `task-item priority-${task.priority} ${task.completed ? 'completed' : ''}`;
+            li.draggable = true;
+            li.dataset.taskId = task.id;
+            
+            li.innerHTML = `
+                <div class="task-content">
+                    <label class="checkbox-container">
+                        <input type="checkbox" ${task.completed ? 'checked' : ''}
+                               onchange="toggleTask('${task.id}')">
+                        <span class="checkmark"></span>
+                    </label>
+                    <div class="task-info">
+                        <div class="task-meta">
+                            <span class="category-tag ${task.category}">${task.category}</span>
+                            ${priorityBadge(task.priority)}
+                        </div>
+                        <span class="task-text">${task.text}</span>
+                        ${dueDateDisplay(task.dueDate)}
+                    </div>
+                </div>
+                <div class="task-actions">
+                    <button class="edit-btn" onclick="editTask('${task.id}')">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="delete-btn" onclick="deleteTask('${task.id}')">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </div>
+            `;
+
+            li.addEventListener('dragstart', handleDragStart);
+            li.addEventListener('dragover', handleDragOver);
+            li.addEventListener('drop', handleDrop);
+
+            return li;
+        }
+
+        // Add remaining JavaScript functions from previous version
+        // (addTask, toggleTask, deleteTask, undoDelete, etc.)
+        // Add new functions for drag-and-drop, editing, and clearCompleted
+
+    </script>
+</body>
+</html>
