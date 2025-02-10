@@ -44,3 +44,30 @@ Ensure you have the following installed:
 - [Node.js](https://nodejs.org/) (v14 or higher)
 - [npm](https://www.npmjs.com/) (v6 or higher)
 
+Running the Application
+To start the development server, run:
+npm install 
+Running the Application
+To start the development server, run:
+
+bash
+npm start
+Open your browser and navigate to http://localhost:9000/ to see the application in action.
+
+Building for Production
+To build the application for production, run:
+
+bash
+npm run build
+The built files will be located in the dist/ directory.
+
+🤝 Contributing
+Contributions are welcome! If you have any improvements or suggestions, feel free to open a pull request or issue.
+
+📄 License
+This project is licensed under the MIT License. See the LICENSE file for details.
+
+📧 Contact
+If you have any questions or feedback, feel free to reach out to us at your-email@example.com.
+
+Thank you for visiting the Task Manager repository! We hope this tool helps you stay organized and productive. 🧑‍💻🎉
